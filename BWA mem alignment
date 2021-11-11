@@ -1,0 +1,30 @@
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=4
+#SBATCH --tasks-per-node=1
+ulimit -s unlimited
+ulimit -l unlimited
+
+module load bio/SAMtools/1.9-pic-intel-2016b
+export PATH=$PATH:/home/asrix/bin/bwa-0.7.17/
+module load lang/Python/3.5.2-pic-intel-2016b
+module load bio/VCFtools/0.1.14-pic-intel-2016b-Perl-5.22.1
+module load bio/BCFtools/1.9-pic-intel-2016b
+
+cd /center1/FISHPOPG/asrix/LTrout/Genomes/
+bwa index -p ArcticCharr -a bwtsw GCF_002910315.2_ASM291031v2_genomic.fna
+bwa index -p LAkeTrout -a bwtsw GCF_016432855.1_SaNama_1.0_genomic.fna
+
+cd /center1/FISHPOPG/asrix/LTrout/
+
+for sample in Sn*.1.fq.gz;
+do bwa mem -t 12 -M -a -R "@RG\tID:${sample}\tSM:A${sample}\tPL:ILLUMINA\tPU:872\tLB:lib7" \
+/center1/FISHPOPG/asrix/LTrout/Genomes/ArcticCharr \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.1.fq.gz \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.2.fq.gz \
+| samtools view -Sbh - | samtools sort -o ${sample}_AC.bam -;
+bwa mem -t 12 -M -a -R "@RG\tID:${sample}\tSM:A${sample}\tPL:ILLUMINA\tPU:872\tLB:lib8" \
+/center1/FISHPOPG/asrix/LTrout/Genomes/LAkeTrout \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.1.fq.gz \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.2.fq.gz \
+| samtools view -Sbh - | samtools sort -o ${sample}_LT.bam -; done
