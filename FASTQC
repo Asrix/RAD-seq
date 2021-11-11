@@ -1,0 +1,16 @@
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=4
+#SBATCH --tasks-per-node=1
+ulimit -s unlimited
+ulimit -l unlimited
+
+export PATH=$PATH:$HOME/bin/FastQC
+cd /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/
+mkdir fastqc
+
+fastqc -t 6 -o fastqc/ *.gz
+
+cd fastqc/
+
+multiqc .
