@@ -18,6 +18,7 @@ if [ $(uname -a | awk '{print $1}') == "Darwin" ]; then
 fi
 
 #THIS IS WHAT MY data-defs.sh LOOKS LIKE:
+  #NOTE: This will need to be edited for each library
 PROGDEFS=/home/asrix/bin/genoscape-bioinformatics/program-defs.sh  # file that defines
 READ1=/center1/FISHPOPG/asrix/LTrout/21006FL-01-01_S0_L001_R1_001.fastq.gz  # fastq.gz file 1
 READ2=/center1/FISHPOPG/asrix/LTrout/21006FL-01-01_S0_L001_R2_001.fastq.gz #fastq.gz file 2
@@ -27,7 +28,7 @@ GENOME_DB=/center1/FISHPOPG/asrix/LTrout/Genomes/LAkeTrout   #ABSOLUTE path to r
 
 
 #THEN RUN 02-rad-flip-trim-and-demultiplex.sh: 
-
+  #This is the same for each library
 #!/bin/bash
 #SBATCH --partition=t1standard
 #SBATCH --ntasks=2
