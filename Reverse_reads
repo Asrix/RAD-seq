@@ -18,7 +18,7 @@ if [ $(uname -a | awk '{print $1}') == "Darwin" ]; then
 fi
 
 #THIS IS WHAT MY data-defs.sh LOOKS LIKE:
-PROGDEFS=/home/asrix/genoscape-bioinformatics/program-defs.sh  # file that defines
+PROGDEFS=/home/asrix/bin/genoscape-bioinformatics/program-defs.sh  # file that defines
 READ1=/center1/FISHPOPG/asrix/LTrout/21006-01/21006FL-01-01_S0_L001_R1_001.fastq.gz  # fastq.gz fi
 READ2=/center1/FISHPOPG/asrix/LTrout/21006-01/21006FL-01-01_S0_L001_R2_001.fastq.gz # paths relat
 BC2COL=/center1/FISHPOPG/asrix/LTrout/lib1index # The two column
@@ -61,7 +61,7 @@ cat out1 | gzip - > flipped/$OUTPATH1.fastq.gz &
 cat out2 | gzip - > flipped/$OUTPATH2.fastq.gz &
 
 ###For bestRAD only: flip read pairs that are reversed and trim extra "GG"
-perl ~/genoscape-bioinformatics/script/flip_trim_werrors.pl xxx_one-column-barcodes.txt in1 in2   out1 out2    true 2 > flipped/flip_script_report.txt
+perl ~/bin/genoscape-bioinformatics/script/flip_trim_werrors.pl xxx_one-column-barcodes.txt in1 in2   out1 out2    true 2 > flipped/flip_script_report.txt
 
 rm in1 in2 out1 out2 xxx_one-column-barcodes.txt
 
