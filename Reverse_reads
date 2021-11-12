@@ -19,11 +19,11 @@ fi
 
 #THIS IS WHAT MY data-defs.sh LOOKS LIKE:
 PROGDEFS=/home/asrix/bin/genoscape-bioinformatics/program-defs.sh  # file that defines
-READ1=/center1/FISHPOPG/asrix/LTrout/21006-01/21006FL-01-01_S0_L001_R1_001.fastq.gz  # fastq.gz fi
-READ2=/center1/FISHPOPG/asrix/LTrout/21006-01/21006FL-01-01_S0_L001_R2_001.fastq.gz # paths relat
-BC2COL=/center1/FISHPOPG/asrix/LTrout/lib1index # The two column
-SHORTNAME=lib-1 # species dash plate number is good.  This is used for output
-GENOME_DB=/center1/FISHPOPG/asrix/LTrout/Genomes/LAkeTrout   # must be the ABSOLUTE
+READ1=/center1/FISHPOPG/asrix/LTrout/21006FL-01-01_S0_L001_R1_001.fastq.gz  # fastq.gz file 1
+READ2=/center1/FISHPOPG/asrix/LTrout/21006FL-01-01_S0_L001_R2_001.fastq.gz #fastq.gz file 2
+BC2COL=/center1/FISHPOPG/asrix/LTrout/lib1index # The two column version, barcode filename
+SHORTNAME=lib-1 #Name of output file
+GENOME_DB=/center1/FISHPOPG/asrix/LTrout/Genomes/LAkeTrout   #ABSOLUTE path to reference genome
 
 
 #THEN RUN 02-rad-flip-trim-and-demultiplex.sh: 
