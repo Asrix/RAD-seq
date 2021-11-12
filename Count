@@ -10,4 +10,4 @@ ulimit -s unlimited
 ulimit -l unlimited
 
 cd /center1/FISHPOPG/asrix/LTrout/demulti_test
-for i in *.fq.gz; do echo $i; zcat $i | wc -l; done
+for i in *.fq.gz; do echo $i; zcat $i | echo $((`wc -l`/4)); done
