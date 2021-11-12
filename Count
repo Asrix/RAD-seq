@@ -1,0 +1,13 @@
+#Count the number of reads in each file after demultiplexing
+
+#Can be done before or after running QC
+
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=1
+#SBATCH --tasks-per-node=1
+ulimit -s unlimited
+ulimit -l unlimited
+
+cd /center1/FISHPOPG/asrix/LTrout/demulti_test
+for i in *.fq.gz; do echo $i; zcat $i | wc -l; done
