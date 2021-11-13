@@ -15,11 +15,9 @@ gstacks -I /center1/FISHPOPG/asrix/LTrout/2Data/aligned/ -M /center1/FISHPOPG/as
 
 populations -P /center1/FISHPOPG/asrix/LTrout/2Data/stacks -M /center1/FISHPOPG/asrix/LTrout/2Data/popmap -r 0.65 --vcf --genepop --fstats --smooth --hwe -t 8
 
-
 #popmap is a txt file with
-The name of the bam file  Population
-ie
-055_LT  BgL
+Name_of_bam_file  Population
+ie 055_LT  BgL
 
 #in gstacks
 #-t is number of threads
@@ -30,11 +28,12 @@ ie
 #--vcf and --genepop make it output in those formats
 #	-t number of threads
 #--hwe and --fst calculate these statistics
-•	-k,--smooth — enable kernel-smoothed π, FIS, FST, FST', and ΦST calculations.
-•	--smooth-fstats — enable kernel-smoothed FST, FST', and ΦST calculations.
-•	--smooth-popstats — enable kernel-smoothed π and FIS calculations. (Note: turning on smoothing implies --ordered_export.)
+#--smooth turns on kernel-smoothing for π, FIS, FST, FST', and ΦST calculations.
 
+#STRUCTURE version of populations
+populations -P . -M /center1/FISHPOPG/asrix/LTrout/Data/popmapLT2 -r 0.8 -O ./STRUCTURE --vcf --genepop --fstats --smooth --hwe \
+-t 8 --structure --write-random-snp --ordered-export
 
-#Populations for STRUCTURE
+#--ordered-export put them in order by the reference genome
 #--write-random-snp only include one random SNP per locus
 #--structure make the structure output folder
