@@ -1,0 +1,28 @@
+#COMPARE EACH LIBRARY STACK RESULTS
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=34
+#SBATCH --tasks-per-node=5
+ulimit -s unlimited
+ulimit -l unlimited
+
+export PATH=$PATH:/home/asrix/bin/stacks-2.53
+module load lang/Python/3.5.2-pic-intel-2016b
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/BWA
+
+gstacks -I /center1/FISHPOPG/asrix/LTrout/Data/BWA/ -M /center1/FISHPOPG/asrix/LTrout/Data/lib1 --rm-pcr-duplicates -O /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib1/ -t 8
+
+populations -P /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib1 -M /center1/FISHPOPG/asrix/LTrout/Data/lib1 -r 0.75 --vcf --genepop --fstats --smooth --hwe -t 8
+
+gstacks -I /center1/FISHPOPG/asrix/LTrout/Data/BWA/ -M /center1/FISHPOPG/asrix/LTrout/Data/lib2 --rm-pcr-duplicates -O /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib2/ -t 8
+
+populations -P /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib2 -M /center1/FISHPOPG/asrix/LTrout/Data/lib2 -r 0.75 --vcf --genepop --fstats --smooth --hwe -t 8
+
+gstacks -I /center1/FISHPOPG/asrix/LTrout/2Data/aligned/ -M /center1/FISHPOPG/asrix/LTrout/Data/lib3 --rm-pcr-duplicates -O /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib3/ -t 8
+
+populations -P /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib3 -M /center1/FISHPOPG/asrix/LTrout/Data/lib3 -r 0.75 --vcf --genepop --fstats --smooth --hwe -t 8
+
+gstacks -I /center1/FISHPOPG/asrix/LTrout/2Data/aligned/ -M /center1/FISHPOPG/asrix/LTrout/Data/lib4 --rm-pcr-duplicates -O /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib4/ -t 8
+
+populations -P /center1/FISHPOPG/asrix/LTrout/Data/STACKS/lib4 -M /center1/FISHPOPG/asrix/LTrout/Data/lib4 -r 0.75 --vcf --genepop --fstats --smooth --hwe -t 8
