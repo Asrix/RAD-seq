@@ -1,0 +1,59 @@
+#COMBINING LIBRARY REPLICATES INTO SINGLE SAMPLES
+touch Sn211.2.fq.gz
+ $ Sn211_4.2.fq.gz Sn211_3.2.fq.gz Sn211_2.2.fq.gz Sn211_1.2.fq.gz >> Sn211.2.fq.gz
+zcat Sn211_4.2.fq.gz | wc -l
+zcat Sn211_3.2.fq.gz | wc -l
+zcat Sn211_2.2.fq.gz | wc -l
+zcat Sn211_1.2.fq.gz | wc -l
+cat Sn211.2.fq.gz | wc -l
+
+rm Sn211.2.fq.gz
+
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=4
+#SBATCH --tasks-per-node=1
+ulimit -s unlimited
+ulimit -l unlimited
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/
+
+for sample in 067 112 211 220 325 333 168 185 004 008 115 147 267 273; do
+touch Sn${sample}.2.fq.gz
+zcat Sn${sample}_4.2.fq.gz Sn${sample}_3.2.fq.gz Sn${sample}_2.2.fq.gz Sn${sample}_1.2.fq.gz >> Sn${sample}.2.fq.gz
+zcat Sn${sample}_4.2.fq.gz | wc -l
+zcat Sn${sample}_3.2.fq.gz | wc -l
+zcat Sn${sample}_2.2.fq.gz | wc -l
+zcat Sn${sample}_1.2.fq.gz | wc -l
+cat Sn${sample}.2.fq.gz | wc -l
+touch Sn${sample}.1.fq.gz
+zcat Sn${sample}_4.1.fq.gz Sn${sample}_3.1.fq.gz Sn${sample}_2.1.fq.gz Sn${sample}_1.1.fq.gz >> Sn${sample}.1.fq.gz
+zcat Sn${sample}_4.1.fq.gz | wc -l
+zcat Sn${sample}_3.1.fq.gz | wc -l
+zcat Sn${sample}_2.1.fq.gz | wc -l
+zcat Sn${sample}_1.1.fq.gz | wc -l
+cat Sn${sample}.1.fq.gz | wc -l; done
+
+
+#SINGLE BWA FOR ALL SAMPLES
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=6
+#SBATCH --tasks-per-node=1
+ulimit -s unlimited
+ulimit -l unlimited
+
+export PATH=$PATH:/home/asrix/bin/bwa-0.7.17/
+module load bio/SAMtools/1.9-pic-intel-2016b
+module load lang/Python/3.5.2-pic-intel-2016b
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/
+
+for sample in 067 112 211 220 325 333 168 185 004 008 115 147 267 273; do cp /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.1.fq.gz /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.2.fq.gz \
+| samtools view -Sbh - | samtools sort -o ${sample}_AC.bam -;
+bwa mem -t 12 -M -a -R "@RG\tID:${sample}\tSM:A${sample}\tPL:ILLUMINA\tPU:872\tLB:lib8" \
+/center1/FISHPOPG/asrix/LTrout/Genomes/LAkeTrout \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.1.fq.gz \
+/center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/Sn${sample}.2.fq.gz \
+| samtools view -Sbh - | samtools sort -o ${sample}_LT.bam -; done
+
