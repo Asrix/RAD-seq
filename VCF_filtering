@@ -1,0 +1,33 @@
+#FILTERING VCF FILE
+module load bio/VCFtools/0.1.14-pic-intel-2016b-Perl-5.22.1
+module load bio/SAMtools/1.9-pic-intel-2016b
+export PATH=$PATH:/home/asrix/bin/bcftools
+
+#MOST FILTERING FROM https://markravinet.github.io/exercise_1_reference_2018.html
+
+vcftools --vcf populations.snps.vcf --missing-indv
+nano out.imiss
+awk '$5 > 0.5' out.imiss | cut -f1 > lowDP.indv
+gnuplot << \EOF 
+set terminal dumb size 120, 30
+set autoscale 
+unset label
+set title "Histogram of % missing data per individual"
+set ylabel "Number of Occurrences"
+set xlabel "% of missing data"
+#set yr [0:100000]
+binwidth=0.01
+bin(x,width)=width*floor(x/width) + binwidth/2.0
+plot 'lowDP.indv' using (bin($1,binwidth)):(1.0) smooth freq with boxes
+pause -1
+
+vcftools --vcf populations.snps.vcf --remove-indels --remove lowDP.indv --max-missing 0.6 --mac 3 --minDP 3 --maxDP 300 \
+--recode --recode-INFO-all --out filtered-LT-one-copy
+
+#This:
+#--remove lowDP.indv; removes any individual with more than 50% missing data
+#--remove-indels; removes any insertions and deletions leaving only SNPs
+#--max-missing 0.6; removes any sites with more than 40% missing data
+#--mac 3; removes minor alleles with fewer than 3 individuals (or one homozygous individual and one heterozygous)
+#--minDP 3; removes SNPs with fewer than 3 reads per individual
+#--maxDP 300; removes SNPs with more than 300 reads
