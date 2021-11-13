@@ -1,0 +1,40 @@
+#!/bin/sh
+#SBATCH --partition=t1standard
+#SBATCH --ntasks=34
+#SBATCH --tasks-per-node=5
+ulimit -s unlimited
+ulimit -l unlimited
+
+export PATH=$PATH:/home/asrix/bin/stacks-2.53
+module load lang/Python/3.5.2-pic-intel-2016b
+
+cd /center1/FISHPOPG/asrix/LTrout/2Data/aligned/
+
+gstacks -I /center1/FISHPOPG/asrix/LTrout/2Data/aligned/ -M /center1/FISHPOPG/asrix/LTrout/2Data/popmap --rm-pcr-duplicates \
+-O /center1/FISHPOPG/asrix/LTrout/2Data/stacks/ -t 8
+
+populations -P /center1/FISHPOPG/asrix/LTrout/2Data/stacks -M /center1/FISHPOPG/asrix/LTrout/2Data/popmap -r 0.65 --vcf --genepop --fstats --smooth --hwe -t 8
+
+
+#popmap is a txt file with
+The name of the bam file  Population
+ie
+055_LT  BgL
+
+#in gstacks
+#-t is number of threads
+#--rm-pcr-duplicates does removes read pairs of the same insert length
+
+#in populations
+#-r is the minimum percentage of individuals in a population required to have locus in order to retain the locus
+#--vcf and --genepop make it output in those formats
+#	-t number of threads
+#--hwe and --fst calculate these statistics
+•	-k,--smooth — enable kernel-smoothed π, FIS, FST, FST', and ΦST calculations.
+•	--smooth-fstats — enable kernel-smoothed FST, FST', and ΦST calculations.
+•	--smooth-popstats — enable kernel-smoothed π and FIS calculations. (Note: turning on smoothing implies --ordered_export.)
+
+
+#Populations for STRUCTURE
+#--write-random-snp only include one random SNP per locus
+#--structure make the structure output folder
