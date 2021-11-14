@@ -1,0 +1,277 @@
+#PCAs-saving dataframe
+if (!require("pacman"))
+  install.packages("pacman")
+pacman::p_load(data.table, ggplot2)
+
+install.packages("gdsfmt")
+install.packages("SNPRelate")
+
+
+library(gdsfmt)
+library(SNPRelate)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("VariantAnnotation")
+library(VariantAnnotation)
+library(RColorBrewer)
+
+vcf.fn <- "filtered-LT-one-copy.vcf"
+snpgdsVCF2GDS(vcf.fn, "test.gds", method="biallelic.only",ignore.chr.prefix="chr")
+snpgdsSummary("test.gds")
+#91,719 SNPs
+
+genofile <- snpgdsOpen("test.gds", readonly=FALSE)
+
+# Get sample id
+sample.id <- read.gdsn(index.gdsn(genofile, "sample.id"))
+head(sample.id)
+popcod<-c("BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+          "BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+          "BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+          "BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+          "BgL","BgL","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+          "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+          "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+          "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+          "Big7","Big7","Big7","Big7","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+          "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+          "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+          "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+          "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Dickey","Dickey","Dickey","Dickey",
+          "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+          "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+          "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+          "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Jata","Jata",
+          "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+          "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+          "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+          "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+          "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+          "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+          "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+          "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+          "LHan","LHan","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL",
+          "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL",
+          "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL",
+          "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL",
+          "RndL","RndL","RndL","RndL")
+cbind(sample.id, popcod)
+
+pca <- snpgdsPCA(genofile,num.thread=2,autosome.only=FALSE)
+pc.percent <- pca$varprop*100
+head(round(pc.percent, 2))
+
+tab <- data.frame(sample.id=sample.id,
+                  pop = factor(popcod)[match(pca$sample.id, sample.id)],
+                  EV1 = pca$eigenvect[,1],    # the first eigenvector
+                  EV2 = pca$eigenvect[,2],    # the second eigenvector
+                  stringsAsFactors = FALSE)
+head(tab)
+plot(tab$EV2, tab$EV1, col=as.integer(tab$pop), xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft", legend=levels(tab$pop), pch="o", col=1:nlevels(tab$pop))
+lbls <- paste("PC", 1:4, "\n", format(pc.percent[1:4], digits=2), "%", sep="")
+pairs(pca$eigenvect[,1:4], col=tab$pop, labels=lbls)
+
+tab1 <- data.frame(sample.id=sample.id,
+                  pop = factor(popcod)[match(pca$sample.id, sample.id)],
+                  EV1 = pca$eigenvect[,1],    # the first eigenvector
+                  EV2 = pca$eigenvect[,2],    # the second eigenvector
+                  EV3 = pca$eigenvect[,3],    # the second eigenvector
+                  stringsAsFactors = FALSE)
+head(tab1)
+save(tab1, file = "PCAdf")
+write.csv(tab1, "PCAdf.csv")
+
+tab1
+
+snpgdsClose(genofile)
+
+install.packages("rgl")
+library(rgl)
+library(tidyverse)
+df<-read.csv("PCAdf.csv", header=TRUE)
+head(df)
+x <- PCA1 <- df$EV1
+y <- PCA2 <- df$EV2
+z <- PCA3 <- df$EV3
+z
+rgl.open()
+rgl.points(x, y, z, color ="white")
+
+test2<-df%>%select(EV1,EV2,EV3)
+test2
+scores = as.data.frame(test2)
+head(scores)
+summary(df)
+plot(tab1[,3:4],cex=0.5, pch=16,col=col3,
+     xlim = c(-.02,.06), ylim=c(-.18,.05), main="PCA-2D")
+#legend("topleft", pch = 20, col=day, legend = c("Day 1","Day 2","Day 3",
+#                                                "Day 4","Day 5","Day 6","Day 7",
+#                                                "Day 8","Day 9","Day 10"), bty='n', cex=.75)
+#legend("topleft", col=1:10, legend = paste("Day", 1:10),
+#       pch = 20, bty='n', cex=.75)
+legend("topright", pch = 20, col=unique(col3), legend = unique(df$pop))
+#text(scores[,1], scores[,2], 
+#     labels=df$sample.id, cex= 0.7, pos=3)
+plot3d(tab1[,3:5], col=col3, size=3, type='p', 
+       xlim = c(-.2,.08), ylim=c(-.18,.05), zlim=c(-.15,.15))
+#text3d(scores[,1]+.1, scores[,2]+.05, scores[,3]+.1,
+#      texts=df$sample.id, cex= 0.7, pos=3)
+
+col3<-c("#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33",
+         "#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33",
+         "#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33",
+         "#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33",
+         "#FFFF33","#FFFF33","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900",
+         "#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900",
+         "#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900",
+         "#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900","#999900",
+         "#999900","#999900","#999900","#999900","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC",
+         "#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC",
+         "#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC",
+         "#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC",
+         "#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#9933CC","#0099FF","#0099FF","#0099FF","#0099FF",
+         "#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF",
+         "#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF",
+         "#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF",
+         "#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#0099FF","#CC0000","#CC0000",
+         "#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000",
+         "#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000",
+         "#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000",
+         "#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000","#CC0000",
+         "#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC",
+         "#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC",
+         "#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC",
+         "#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC","#3333CC",
+         "#3333CC","#3333CC","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033",
+         "#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033",
+         "#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033",
+         "#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033","#FF0033",
+         "#FF0033","#FF0033","#FF0033","#FF0033")
+
+plot3d(tab1[,3:5], col=col3, size=2, type='p', 
+       xlim = c(-.2,.08), ylim=c(-.18,.05), zlim=c(-.15,.15))
+
+rgl.snapshot("3DPCA-Merge.png", "png")
+
+
+
+#output image
+rgl.snapshot("3DPCA-still.png", "png")
+#ouput pdf:
+rgl.postscript("3DPCA-Merge.pdf", "pdf")
+dir.create("animation_merge")
+for (i in 1:360) {
+  view3d(userMatrix=rotationMatrix(2*pi * i/360, 0.1, 1, 0.5))
+  rgl.snapshot(filename=paste("animation_merge/frame-",
+                              sprintf("%03d", i), ".png", sep=""))}
+
+
+
+
+
+#library test unfiltered
+vcf1.fn<-"lib_snps.vcf"
+snpgdsVCF2GDS(vcf1.fn, "test1.gds", method="biallelic.only",ignore.chr.prefix="chr")
+snpgdsSummary("test1.gds")
+#118,227 SNPs
+genofile<-snpgdsOpen("test1.gds", readonly=FALSE)
+# Get sample id
+sample_lib.id<- read.gdsn(index.gdsn(genofile,"sample.id"))
+sample_lib.id
+pop_lib<-c("1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4")
+pop_lake<-c("BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+           "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+           "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+           "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+           "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+           "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+           "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL")
+cbind(sample_lib.id,pop_lib)
+cbind(sample_lib.id,pop_lake)
+pca_lib<-snpgdsPCA(genofile,num.thread=2,autosome.only=FALSE)
+pc.percent_lib<-pca_lib$varprop*100
+head(round(pc.percent_lib,2))
+tab_lake<-data.frame(sample.id=sample_lib.id,
+                  pop = factor(pop_lake)[match(pca_lib$sample.id,sample_lib.id)],
+                  EV1 = pca_lib$eigenvect[,1],    # the first eigenvector
+                  EV2 = pca_lib$eigenvect[,2],    # the second eigenvector
+                  stringsAsFactors = FALSE)
+plot(tab_lake$EV2,tab_lake$EV1,col=as.integer(tab_lake$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lake$pop),pch="o",
+       col=1:nlevels(tab_lake$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib[1:4],digits=2),"%",sep="")
+pairs(pca_lib$eigenvect[,1:4],col=tab_lake$pop,labels=lbls)
+
+tab_lib<-data.frame(sample.id=sample_lib.id,
+                     pop = factor(pop_lib)[match(pca_lib$sample.id,sample_lib.id)],
+                     EV1 = pca_lib$eigenvect[,1],    # the first eigenvector
+                     EV2 = pca_lib$eigenvect[,2],    # the second eigenvector
+                     stringsAsFactors = FALSE)
+plot(tab_lib$EV2,tab_lib$EV1,col=as.integer(tab_lib$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lib$pop),pch="o",
+       col=1:nlevels(tab_lib$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib[1:4],digits=2),"%",sep="")
+pairs(pca_lib$eigenvect[,1:4],col=tab_lib$pop,labels=lbls)
+snpgdsClose(genofile)
+
+
+
+
+#filtered library test
+vcf2.fn<-"lib_snps_filtered.vcf"
+snpgdsVCF2GDS(vcf2.fn,"test2.gds",method="biallelic.only",ignore.chr.prefix="chr")
+snpgdsSummary("test2.gds")
+#55,110 SNPs
+genofile1<-snpgdsOpen("test2.gds",readonly=FALSE)
+# Get sample id
+sample_lib.id<- read.gdsn(index.gdsn(genofile1,"sample.id"))
+sample_lib.id
+pop_lib<-c("1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4")
+pop_lake<-c("BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+            "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+            "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+            "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+            "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+            "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+            "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL")
+cbind(sample_lib.id,pop_lib)
+cbind(sample_lib.id,pop_lake)
+pca_lib_filt<-snpgdsPCA(genofile1,num.thread=2,autosome.only=FALSE)
+pc.percent_lib_filt<-pca_lib_filt$varprop*100
+head(round(pc.percent_lib_filt,2))
+tab_lake2<-data.frame(sample.id=sample_lib.id,
+                     pop = factor(pop_lake)[match(pca_lib_filt$sample.id,sample_lib.id)],
+                     EV1 = pca_lib_filt$eigenvect[,1],    # the first eigenvector
+                     EV2 = pca_lib_filt$eigenvect[,2],    # the second eigenvector
+                     stringsAsFactors = FALSE)
+plot(tab_lake2$EV2,tab_lake2$EV1,col=as.integer(tab_lake2$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lake2$pop),pch="o",
+       col=1:nlevels(tab_lake2$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib_filt[1:4],digits=2),"%",sep="")
+pairs(pca_lib_filt$eigenvect[,1:4],col=tab_lake2$pop,labels=lbls)
+
+tab_lib2<-data.frame(sample.id=sample_lib.id,
+                    pop = factor(pop_lib)[match(pca_lib_filt$sample.id,sample_lib.id)],
+                    EV1 = pca_lib_filt$eigenvect[,1],    # the first eigenvector
+                    EV2 = pca_lib_filt$eigenvect[,2],    # the second eigenvector
+                    stringsAsFactors = FALSE)
+plot(tab_lib2$EV2,tab_lib2$EV1,col=as.integer(tab_lib2$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lib2$pop),pch="o",
+       col=1:nlevels(tab_lib2$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib_filt[1:4],digits=2),"%",sep="")
+pairs(pca_lib_filt$eigenvect[,1:4],col=tab_lib2$pop,labels=lbls)
+snpgdsClose(genofile1)
