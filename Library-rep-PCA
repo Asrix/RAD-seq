@@ -1,3 +1,6 @@
+#This is run in R, to use R Studio, save the VCF file(s) to the Desktop
+#The populations will need to be inputed by hand
+
 if (!require("pacman"))
   install.packages("pacman")
 pacman::p_load(data.table, ggplot2)
