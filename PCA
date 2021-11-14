@@ -1,3 +1,9 @@
+##THIS IS RUN IN R (R STUDIO ON DESKTOP)
+
+#Save the filtered VCF to your computer before beginning
+#You will need to enter the population code for each sample by hand
+
+
 #PCAs-saving dataframe
 if (!require("pacman"))
   install.packages("pacman")
