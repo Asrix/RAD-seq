@@ -16,17 +16,24 @@ Takes the data from raw reads into vcf and beyond.
 
     4b) SAMTOOLS for interesting stats
 
-5) Run STACKS
+5) Run [STACKS](https://github.com/Asrix/RAD-seq/blob/main/STACKS)
 
-6) Check your library replicates
+6) Check your library replicates with [STACKS](https://github.com/Asrix/RAD-seq/blob/main/Library-replicate-comparisons), optional [VCF_filtering](https://github.com/Asrix/RAD-seq/blob/main/VCF_filtering) (don't get rid of any individuals!),  a [PCA](https://github.com/Asrix/RAD-seq/blob/main/Library-rep-PCA)
 
 If these look good:
-7) Combine your library replicates
-8) Realign
-9) STACKS
-10) Filter the VCF
-11) PCA
+
+7) Combine your [library replicates](https://github.com/Asrix/RAD-seq/blob/main/Combining-replicates)
+
+8) Realign [BWA mem](https://github.com/Asrix/RAD-seq/blob/main/BWA%20mem%20alignment)
+
+9) STACKS [STACKS](https://github.com/Asrix/RAD-seq/blob/main/STACKS)
+
+10) Filter the [VCF](https://github.com/Asrix/RAD-seq/blob/main/VCF_filtering)
+
+11) [PCAs](https://github.com/Asrix/RAD-seq/blob/main/PCA)
+
 12) Population statistics
+
 13) STRUCTURE
 
 
