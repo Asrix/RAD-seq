@@ -1,0 +1,118 @@
+if (!require("pacman"))
+  install.packages("pacman")
+pacman::p_load(data.table, ggplot2)
+
+install.packages("gdsfmt")
+install.packages("SNPRelate")
+
+library(gdsfmt)
+library(SNPRelate)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("VariantAnnotation")
+library(VariantAnnotation)
+library(RColorBrewer)
+
+
+#library test unfiltered
+vcf1.fn<-"lib_snps.vcf"
+snpgdsVCF2GDS(vcf1.fn, "test1.gds", method="biallelic.only",ignore.chr.prefix="chr")
+snpgdsSummary("test1.gds")
+#118,227 SNPs
+genofile<-snpgdsOpen("test1.gds", readonly=FALSE)
+# Get sample id
+sample_lib.id<- read.gdsn(index.gdsn(genofile,"sample.id"))
+sample_lib.id
+pop_lib<-c("1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4")
+pop_lake<-c("BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+           "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+           "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+           "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+           "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+           "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+           "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL")
+cbind(sample_lib.id,pop_lib)
+cbind(sample_lib.id,pop_lake)
+pca_lib<-snpgdsPCA(genofile,num.thread=2,autosome.only=FALSE)
+pc.percent_lib<-pca_lib$varprop*100
+head(round(pc.percent_lib,2))
+tab_lake<-data.frame(sample.id=sample_lib.id,
+                  pop = factor(pop_lake)[match(pca_lib$sample.id,sample_lib.id)],
+                  EV1 = pca_lib$eigenvect[,1],    # the first eigenvector
+                  EV2 = pca_lib$eigenvect[,2],    # the second eigenvector
+                  stringsAsFactors = FALSE)
+plot(tab_lake$EV2,tab_lake$EV1,col=as.integer(tab_lake$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lake$pop),pch="o",
+       col=1:nlevels(tab_lake$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib[1:4],digits=2),"%",sep="")
+pairs(pca_lib$eigenvect[,1:4],col=tab_lake$pop,labels=lbls)
+
+tab_lib<-data.frame(sample.id=sample_lib.id,
+                     pop = factor(pop_lib)[match(pca_lib$sample.id,sample_lib.id)],
+                     EV1 = pca_lib$eigenvect[,1],    # the first eigenvector
+                     EV2 = pca_lib$eigenvect[,2],    # the second eigenvector
+                     stringsAsFactors = FALSE)
+plot(tab_lib$EV2,tab_lib$EV1,col=as.integer(tab_lib$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lib$pop),pch="o",
+       col=1:nlevels(tab_lib$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib[1:4],digits=2),"%",sep="")
+pairs(pca_lib$eigenvect[,1:4],col=tab_lib$pop,labels=lbls)
+snpgdsClose(genofile)
+
+#filtered library test
+vcf2.fn<-"lib_snps_filtered.vcf"
+snpgdsVCF2GDS(vcf2.fn,"test2.gds",method="biallelic.only",ignore.chr.prefix="chr")
+snpgdsSummary("test2.gds")
+#55,110 SNPs
+genofile1<-snpgdsOpen("test2.gds",readonly=FALSE)
+# Get sample id
+sample_lib.id<- read.gdsn(index.gdsn(genofile1,"sample.id"))
+sample_lib.id
+pop_lib<-c("1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4","1","2","3","4",
+           "1","2","3","4","1","2","3","4")
+pop_lake<-c("BgL","BgL","BgL","BgL","BgL","BgL","BgL","BgL",
+            "Big7","Big7","Big7","Big7","Big7","Big7","Big7","Big7",
+            "Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd","Chnd",
+            "Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey","Dickey",
+            "Jata","Jata","Jata","Jata","Jata","Jata","Jata","Jata",
+            "LHan","LHan","LHan","LHan","LHan","LHan","LHan","LHan",
+            "RndL","RndL","RndL","RndL","RndL","RndL","RndL","RndL")
+cbind(sample_lib.id,pop_lib)
+cbind(sample_lib.id,pop_lake)
+pca_lib_filt<-snpgdsPCA(genofile1,num.thread=2,autosome.only=FALSE)
+pc.percent_lib_filt<-pca_lib_filt$varprop*100
+head(round(pc.percent_lib_filt,2))
+tab_lake2<-data.frame(sample.id=sample_lib.id,
+                     pop = factor(pop_lake)[match(pca_lib_filt$sample.id,sample_lib.id)],
+                     EV1 = pca_lib_filt$eigenvect[,1],    # the first eigenvector
+                     EV2 = pca_lib_filt$eigenvect[,2],    # the second eigenvector
+                     stringsAsFactors = FALSE)
+plot(tab_lake2$EV2,tab_lake2$EV1,col=as.integer(tab_lake2$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lake2$pop),pch="o",
+       col=1:nlevels(tab_lake2$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib_filt[1:4],digits=2),"%",sep="")
+pairs(pca_lib_filt$eigenvect[,1:4],col=tab_lake2$pop,labels=lbls)
+
+tab_lib2<-data.frame(sample.id=sample_lib.id,
+                    pop = factor(pop_lib)[match(pca_lib_filt$sample.id,sample_lib.id)],
+                    EV1 = pca_lib_filt$eigenvect[,1],    # the first eigenvector
+                    EV2 = pca_lib_filt$eigenvect[,2],    # the second eigenvector
+                    stringsAsFactors = FALSE)
+plot(tab_lib2$EV2,tab_lib2$EV1,col=as.integer(tab_lib2$pop),
+     xlab="eigenvector 2", ylab="eigenvector 1")
+legend("bottomleft",legend=levels(tab_lib2$pop),pch="o",
+       col=1:nlevels(tab_lib2$pop))
+lbls<-paste("PC",1:4,"\n",format(pc.percent_lib_filt[1:4],digits=2),"%",sep="")
+pairs(pca_lib_filt$eigenvect[,1:4],col=tab_lib2$pop,labels=lbls)
+snpgdsClose(genofile1)
