@@ -1,13 +1,4 @@
 #COMBINING LIBRARY REPLICATES INTO SINGLE SAMPLES
-touch Sn211.2.fq.gz
- $ Sn211_4.2.fq.gz Sn211_3.2.fq.gz Sn211_2.2.fq.gz Sn211_1.2.fq.gz >> Sn211.2.fq.gz
-zcat Sn211_4.2.fq.gz | wc -l
-zcat Sn211_3.2.fq.gz | wc -l
-zcat Sn211_2.2.fq.gz | wc -l
-zcat Sn211_1.2.fq.gz | wc -l
-cat Sn211.2.fq.gz | wc -l
-
-rm Sn211.2.fq.gz
 
 #!/bin/sh
 #SBATCH --partition=t1standard
@@ -21,18 +12,19 @@ cd /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/
 for sample in 067 112 211 220 325 333 168 185 004 008 115 147 267 273; do
 touch Sn${sample}.2.fq.gz
 zcat Sn${sample}_4.2.fq.gz Sn${sample}_3.2.fq.gz Sn${sample}_2.2.fq.gz Sn${sample}_1.2.fq.gz >> Sn${sample}.2.fq.gz
-zcat Sn${sample}_4.2.fq.gz | wc -l
+echo ${sample}; zcat Sn${sample}_4.2.fq.gz | wc -l
 zcat Sn${sample}_3.2.fq.gz | wc -l
 zcat Sn${sample}_2.2.fq.gz | wc -l
 zcat Sn${sample}_1.2.fq.gz | wc -l
-cat Sn${sample}.2.fq.gz | wc -l
+echo ${sample}; cat Sn${sample}.2.fq.gz | wc -l
+#sum of the first for needs to be the same as the last line
 touch Sn${sample}.1.fq.gz
 zcat Sn${sample}_4.1.fq.gz Sn${sample}_3.1.fq.gz Sn${sample}_2.1.fq.gz Sn${sample}_1.1.fq.gz >> Sn${sample}.1.fq.gz
-zcat Sn${sample}_4.1.fq.gz | wc -l
+echo ${sample}; zcat Sn${sample}_4.1.fq.gz | wc -l
 zcat Sn${sample}_3.1.fq.gz | wc -l
 zcat Sn${sample}_2.1.fq.gz | wc -l
 zcat Sn${sample}_1.1.fq.gz | wc -l
-cat Sn${sample}.1.fq.gz | wc -l; done
+echo ${sample}; cat Sn${sample}.1.fq.gz | wc -l; done
 
 
 #SINGLE BWA FOR ALL SAMPLES
