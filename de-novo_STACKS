@@ -1,0 +1,57 @@
+#!/bin/sh
+#SBATCH --partition=bio
+#SBATCH --ntasks=1
+#SBATCH --tasks-per-node=1
+#SBATCH --mem=214G
+#SBATCH --time=2-00:00:00
+
+export PATH=$PATH:/home/asrix/bin/stacks-2.53
+module load bio/SAMtools/1.9-pic-intel-2016b
+export PATH=$PATH:/home/asrix/bin/bwa-0.7.17/
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/STACKS/denovo/
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 4 -m 3 -r 0.8 -n 4 -o ./M4/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 5 -m 3 -r 0.8 -n 5 -o ./M5/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 6 -m 3 -r 0.8 -n 6 -o ./M6/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 7 -m 3 -r 0.8 -n 7 -o ./M7/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/STACKS/denovo/
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 8 -m 3 -r 0.8 -n 8 -o ./M8/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 9 -m 3 -r 0.8 -n 9 -o ./M9/ --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap ../../poplibLT3 --paired --rm-pcr-duplicates
+
+#Use this data to determine the optimal numbers for -M, -n, and -m.
+#Choose the number that maximize the number of polymorphic loci found in 80% of the individuals
+#https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12775
+
+#!/bin/sh
+#SBATCH --partition=bio
+#SBATCH --ntasks=1
+#SBATCH --tasks-per-node=1
+#SBATCH --mem=214G
+#SBATCH --time=6-00:00:00
+
+export PATH=$PATH:/home/asrix/bin/stacks-2.53
+module load bio/SAMtools/1.9-pic-intel-2016b
+export PATH=$PATH:/home/asrix/bin/bwa-0.7.17/
+
+cd /center1/FISHPOPG/asrix/LTrout/Data/STACKS/denovo/full
+
+/home/asrix/bin/stacks-2.53/scripts/denovo_map.pl -T 8 -M 7 -m 3 -r 0.8 -n 7 -o . --samples /center1/FISHPOPG/asrix/LTrout/Data/demultiplexed/ \
+--popmap /center1/FISHPOPG/asrix/LTrout/Data/popmap-denovo --paired --rm-pcr-duplicates
+
+populations -P /center1/FISHPOPG/asrix/LTrout/Data/STACKS/denovo/full -O ./VCF-.75 -M /center1/FISHPOPG/asrix/LTrout/Data/popmap-denovo \
+-t 8 -r 0.75 --fstats --vcf --genepop --hwe
+
+populations -P . -M /center1/FISHPOPG/asrix/LTrout/Data/popmap-denovo -r 0.8 -O ./Struct -t 8 --structure --write-random-snp
