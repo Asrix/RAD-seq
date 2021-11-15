@@ -34,8 +34,8 @@ If these look good:
 
 12) Population statistics
 
-13) STRUCTURE
+13) [STRUCTURE](https://github.com/Asrix/RAD-seq/blob/main/STRUCTURE)
 
 
 Data exploration:
-  1) Try STACKS denovo
+  1) Try [STACKS denovo](https://github.com/Asrix/RAD-seq/blob/main/de-novo_STACKS)
