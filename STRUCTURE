@@ -1,4 +1,8 @@
+#Look here for help https://simison.com/brian/Structure_notes.html
+#Another good source: https://pbgworks.org/sites/pbgworks.org/files/Tutorial%20of%20STRUCTURE%20software.pdf
+
 #STACKS in STRUCTURE format
+
 #!/bin/sh
 #SBATCH --partition=bio
 #SBATCH --ntasks=1
@@ -10,12 +14,64 @@ export PATH=$PATH:/home/asrix/bin/stacks-2.53
 module load lang/Python/3.5.2-pic-intel-2016b
 cd /center1/FISHPOPG/asrix/LTrout/Data/STACKS/LT_one_per_fish
 mkdir STRUCTURE
-populations -P . -M /center1/FISHPOPG/asrix/LTrout/Data/popmapLT2 -r 0.8 -O ./STRUCTURE --vcf --genepop --fstats --smooth --hwe -t 8 --structure --write-random-snp --ordered-export
+populations -P . -M /center1/FISHPOPG/asrix/LTrout/Data/popmapLT2 -r 0.8 -O ./STRUCTURE --vcf --genepop --fstats --smooth --hwe -t 8 \
+--structure --write-random-snp --ordered-export
 
 #Number of SNPs
 head -n 1 /center1/FISHPOPG/asrix/LTrout/Data/STACKS/LT_one_per_fish/STRUCTURE/populations.structure | tr "\t" "\n" | grep -v "^$" | wc -l
 #51500
-#Look here for help https://simison.com/brian/Structure_notes.html
+
+#need missing data in STRUCTURE file to be encoded by -9 not 0
+sed -i 's:0\t:-9\t:g' populations.structure2
+#works with linux not MACOS
+
+#INSTALLING STRUCTURE (https://web.stanford.edu/group/pritchardlab/structure_software/release_versions/v2.3.4/html/structure.html)
+wget https://web.stanford.edu/group/pritchardlab/structure_software/release_versions/v2.3.4/release/structure_linux_console.tar.gz
+tar xzvf structure_linux_console.tar.gz
+cd console
+./install
+
+nano mainparams
+
+#mainparams<-Many can be defined in command line
+Basic Program Parameters
+#define MAXPOPS    9	  // (int) number of populations assumed
+#define BURNIN    50000   // (int) length of burnin period
+#define NUMREPS   500000   // (int) number of MCMC reps after burnin
+
+Input/Output files
+#define INFILE   infile   // (str) name of input data file
+#define OUTFILE  outfile  //(str) name of output data file
+
+Data file format
+#define NUMINDS    294    // (int) number of diploid individuals in data file
+#define NUMLOCI    51500    // (int) number of loci in data file
+#define PLOIDY       2    // (int) ploidy of data
+#define MISSING     0    // (int) value given to missing genotype data
+#define ONEROWPERIND 0    // (B) store data for individuals in a single line
+#define LABEL     1     // (B) Input file contains individual labels
+#define POPDATA   1     // (B) Input file contains a population identifier
+#define POPFLAG   0     // (B) Input file contains a flag which says
+                              whether to use popinfo when USEPOPINFO==1
+#define LOCDATA   0     // (B) Input file contains a location identifier
+#define PHENOTYPE 0     // (B) Input file contains phenotype information
+#define EXTRACOLS 0     // (int) Number of additional columns of data
+                             before the genotype data start.
+#define MARKERNAMES	 1  // (B) data file contains row of marker names
+#define RECESSIVEALLELES 0  // (B) data file contains dominant markers (eg AFLPs)
+                            // and a row to indicate which alleles are recessive
+#define MAPDISTANCES     0  // (B) data file contains row of map distances
+                            // between loci
+Advanced data file options
+#define PHASED           0 // (B) Data are in correct phase (relevant for linkage model only)
+#define PHASEINFO        0 // (B) the data for each individual contains a line
+                                  indicating phase (linkage model)
+#define MARKOVPHASE	 0 // (B) the phase info follows a Markov model.
+#define NOTAMBIGUOUS  -999 // (int) for use in some analyses of polyploid data
+
+nano extraparams
+#left these at defaults
+
 
 #!/bin/sh
 #SBATCH --partition=bio
@@ -30,16 +86,17 @@ cd /center1/FISHPOPG/asrix/LTrout/Data/STACKS/LT_one_per_fish/STRUCTURE
 for k in 2 3 4 5 6 7 8 9; do /home/asrix/bin/console/structure -m /home/asrix/bin/console/mainparams -e /home/asrix/bin/console/extraparams \
 -s /home/asrix/bin/console/stratparams -K $k -i populations.structure -o structure.$k; done
 
+#Command line options:
+#-m mainparams
+#-e extraparams
+#-s stratparams
+#-K MAXPOPS
+#-L NUMLOCI
+#-N NUMINDS
+#-i input file
+#-o output file
+#-D SEED
 
-#BELOW HERE NEEDS EDITTING
-
-in R, but first need missing data from structure to be encoded by -9 not 0
-sed -i '' 's:0$(printf '\t'):-9$(printf '\t'):g' populations.structure2
-awk  '{gsub("0<Tab>","-9<Tab>",$0); print;}' populations.structure2
-#BOTH FAIL, but
-sed -i 's:0\t:-9\t:g' populations.structure2
-#works with linux not MACOS
-#Full dataset not loading into R, trying with smaller set used for GIU STRUCTURE.
 
 #STRUCTURE IMAGES-distruct
 wget https://web.stanford.edu/group/rosenberglab/software/distruct1.1.tar.gz
@@ -48,18 +105,19 @@ tar xvf distruct1.1.tar
 
 /home/asrix/bin/distruct1.1/distructLinux1.1
 
--d drawparams
--K K
--M NUMPOPS
--N NUMINDS
--p input file (population q's)
--i input file (individual q's)
--a input file (labels atop figure)
--b input file (labels below figure)
--c input file (cluster permutation)
--o output file
+/home/asrix/bin/distruct1.1/distructLinux1.1 -d drawparams -K 2 -M 7 -N 294 -p 2structure.popq -i 2structure.indivq -a structure.names \
+-b structure.languages -o 2structure
 
-/home/asrix/bin/distruct1.1/distructLinux1.1 -d drawparams -K 2 -M 7 -N 294 -p 2structure.popq -i 2structure.indivq -a structure.names -b structure.languages -o 2structure
-#gives file, not image, but when opened with Preview makes a PDF
+/home/asrix/bin/distruct1.1/distructLinux1.1 -d drawparams -K 5 -M 7 -N 294 -p 5structure.popq -i 5structure.indivq -a structure.names \
+-b structure.languages -o 5structure
 
-/home/asrix/bin/distruct1.1/distructLinux1.1 -d drawparams -K 5 -M 7 -N 294 -p 5structure.popq -i 5structure.indivq -a structure.names -b structure.languages -o 5structure
+#-d drawparams
+#-K K
+#-M NUMPOPS
+#-N NUMINDS
+#-p input file (population q's)
+#-i input file (individual q's)
+#-a input file (labels atop figure)
+#-b input file (labels below figure)
+#-c input file (cluster permutation)
+#-o output file
