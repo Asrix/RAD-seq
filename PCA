@@ -1,6 +1,6 @@
 ##THIS IS RUN IN R (R STUDIO ON DESKTOP)
 
-#Modified from: http://corearray.sourceforge.net/tutorials/SNPRelate/#principal-component-analysis-pca
+#Modified from: https://www.bioconductor.org/packages/devel/bioc/vignettes/SNPRelate/inst/doc/SNPRelate.html
 
 #Save the filtered VCF to your computer before beginning
 #You will need to enter the population code for each sample by hand
